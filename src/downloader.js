@@ -74,6 +74,41 @@ let ffmpegPath = getFfmpegPath();
  * Returns standardized base arguments for yt-dlp across all commands
  * Automatically configures Node.js as the external JavaScript runtime and enables remote EJS solvers
  */
+/**
+ * Resolves active Netscape cookies file for YouTube & cloud datacenter bypass.
+ */
+function getCookiesPath() {
+  if (process.env.COOKIES_PATH && fs.existsSync(process.env.COOKIES_PATH)) {
+    return process.env.COOKIES_PATH;
+  }
+  const envCookies = process.env.YOUTUBE_COOKIES || process.env.COOKIES_CONTENT;
+  if (envCookies && envCookies.trim().length > 20) {
+    try {
+      const envCookieFile = path.join(tempDir, 'env_cookies.txt');
+      if (!fs.existsSync(envCookieFile) || fs.statSync(envCookieFile).size === 0) {
+        fs.writeFileSync(envCookieFile, envCookies.trim(), 'utf8');
+      }
+      return envCookieFile;
+    } catch (_) {}
+  }
+  const rootCookies = path.join(__dirname, '..', 'cookies.txt');
+  if (fs.existsSync(rootCookies) && fs.statSync(rootCookies).size > 0) {
+    return rootCookies;
+  }
+  const tempCookies = path.join(tempDir, 'cookies.txt');
+  if (fs.existsSync(tempCookies) && fs.statSync(tempCookies).size > 0) {
+    return tempCookies;
+  }
+  try {
+    const userHome = os.homedir();
+    const winDownloadCookies = path.join(userHome, 'Downloads', 'cookies.txt');
+    if (fs.existsSync(winDownloadCookies) && fs.statSync(winDownloadCookies).size > 0) {
+      return winDownloadCookies;
+    }
+  } catch (_) {}
+  return null;
+}
+
 function getYtDlpBaseArgs() {
   const nodeBinary = process.execPath;
   const args = [
@@ -89,6 +124,10 @@ function getYtDlpBaseArgs() {
   ];
   if (isWindows) {
     args.push('--windows-filenames');
+  }
+    const cookiePath = getCookiesPath();
+  if (cookiePath) {
+    args.push('--cookies', cookiePath);
   }
   return args;
 }
@@ -112,8 +151,8 @@ function classifyMediaError(stderr, code) {
   if (lower.includes('not made this video available in your country') || lower.includes('region')) {
     return 'This video is region-restricted and unavailable in the server’s country.';
   }
-  if (lower.includes('failed to extract any player response') || lower.includes('bot')) {
-    return 'YouTube rate limit or anti-bot challenge encountered. Please wait a few moments and try again.';
+  if (lower.includes('failed to extract any player response') || lower.includes('bot') || lower.includes('sign in to confirm you')) {
+    return 'YouTube rate limit or bot check on datacenter IP. Please retry or provide cookies.txt.';
   }
   if (lower.includes('copyright') || lower.includes('blocked')) {
     return 'This video is blocked due to copyright restrictions.';
@@ -911,7 +950,7 @@ async function analyzeWithYtdlp(url) {
 
     if (isYouTube) {
       args.push(
-        '--extractor-args', 'youtube:player_client=android,web'
+        '--extractor-args', 'youtube:player_client=ios,android,mweb,web'
       );
     }
 
@@ -940,6 +979,13 @@ async function analyzeWithYtdlp(url) {
       clearTimeout(timeout);
 
       if (code !== 0 || !stdout.trim()) {
+        if (isYouTube) {
+          console.warn('[Downloader] yt-dlp YouTube analysis encountered challenge, triggering oEmbed fallback...');
+          return analyzeYouTubeFallback(url).then(safeResolve).catch(() => {
+            const classified = classifyMediaError(stderr, code);
+            safeReject(new Error(classified));
+          });
+        }
         if (isInstagram) {
           // Instagram photo posts or carousels may not have video JSON; attempt native HTML parser
           return analyzeInstagramPost(url).then(safeResolve).catch(() => {
@@ -1466,7 +1512,7 @@ function startDownloadJob(options) {
   const isYouTube = (url && (url.includes('youtube.com') || url.includes('youtu.be'))) || (downloadTarget && downloadTarget.startsWith('ytsearch'));
   if (isYouTube) {
     args.push(
-      '--extractor-args', 'youtube:player_client=android,web'
+      '--extractor-args', 'youtube:player_client=ios,android,mweb,web'
     );
     if (downloadTarget.startsWith('ytsearch')) {
       args.push('--playlist-items', '1');
@@ -1752,7 +1798,7 @@ function downloadMediaDirect(options) {
       const isYouTube = (url && (url.includes('youtube.com') || url.includes('youtu.be'))) || (downloadTarget && downloadTarget.startsWith('ytsearch'));
       if (isYouTube) {
         args.push(
-          '--extractor-args', 'youtube:player_client=android,web'
+          '--extractor-args', 'youtube:player_client=ios,android,mweb,web'
         );
         if (downloadTarget.startsWith('ytsearch')) {
           args.push('--playlist-items', '1');
@@ -1926,7 +1972,7 @@ function startPlaylistBatchJob(options) {
             '--convert-thumbnails', 'jpg',
             '--add-metadata',
             '--postprocessor-args', 'ffmpeg:-strict experimental -threads 0',
-            '--extractor-args', 'youtube:player_client=android,web',
+            '--extractor-args', 'youtube:player_client=ios,android,mweb,web',
             '--playlist-items', '1',
             '-o', outputTemplate,
             downloadTarget
