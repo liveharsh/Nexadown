@@ -98,8 +98,24 @@ function getYtDlpBaseArgs() {
     '--fragment-retries', '5',
     '--js-runtimes', `node:${nodeBinary}`,
     '--remote-components', 'ejs:github',
-    '--extractor-args', 'youtube:player_client=android,web'
+    '--extractor-args', 'youtube:player_client=android_embedded,web_embedded,android,web;player_skip=configs',
+    '--add-header', 'User-Agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36',
+    '--add-header', 'Accept-Language:en-US,en;q=0.9'
   ];
+  // Auto-load YouTube Cookies from environment variable or cookies.txt file
+  const cookiesPath = path.join(__dirname, '..', 'cookies.txt');
+  const tempCookiesPath = path.join(tempDir, 'cookies.txt');
+  if (process.env.YOUTUBE_COOKIES && process.env.YOUTUBE_COOKIES.trim()) {
+    try {
+      fs.writeFileSync(tempCookiesPath, process.env.YOUTUBE_COOKIES.trim(), 'utf8');
+      args.push('--cookies', tempCookiesPath);
+    } catch (_) {}
+  } else if (fs.existsSync(cookiesPath)) {
+    args.push('--cookies', cookiesPath);
+  } else if (fs.existsSync(tempCookiesPath)) {
+    args.push('--cookies', tempCookiesPath);
+  }
+
   if (isWindows) {
     args.push('--windows-filenames');
   }
@@ -438,7 +454,8 @@ function classifyMediaError(stderr, code) {
   const lower = (stderr || '').toLowerCase();
   if (lower.includes('private video')) return 'This media is private and requires authorization.';
   if (lower.includes('unavailable') || lower.includes('removed')) return 'This media is unavailable or was removed.';
-  if (lower.includes('age-restricted') || lower.includes('sign in')) return 'This media is age-restricted and requires account verification.';
+  if (lower.includes('confirm your age') || lower.includes('age-restricted') || lower.includes('inappropriate for some users')) return 'This video is age-restricted by YouTube. Sign-in cookies are required to download it.';
+  if (lower.includes('bot') || lower.includes('confirm you') || lower.includes('sign in')) return 'YouTube rate limit or bot check on datacenter IP. Please retry or provide cookies.txt.';
   if (lower.includes('copyright')) return 'Blocked due to copyright restrictions.';
   if (lower.includes('bot') || lower.includes('player response')) return 'Platform rate limit encountered. Please wait a few moments and retry.';
   return 'Media extraction failed. Check if link is public and accessible.';
