@@ -60,7 +60,7 @@ class FacebookProvider {
       {
         id: 'audio-mp3-320',
         type: 'audio',
-        audioFormat: 'mp3',
+        audioFormat: 'mp3', ext: 'mp3',
         bitrate: '320k',
         label: 'MP3 Audio Stream (320 kbps)',
         badge: 'MP3',

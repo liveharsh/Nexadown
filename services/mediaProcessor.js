@@ -97,7 +97,8 @@ function getYtDlpBaseArgs() {
     '--retries', '5',
     '--fragment-retries', '5',
     '--js-runtimes', `node:${nodeBinary}`,
-    '--remote-components', 'ejs:github'
+    '--remote-components', 'ejs:github',
+    '--extractor-args', 'youtube:player_client=android,web'
   ];
   if (isWindows) {
     args.push('--windows-filenames');
@@ -296,21 +297,39 @@ function executeJob(job) {
       '--audio-format', job.audioFormat || 'mp3',
       '--audio-quality', job.audioBitrate || '320k',
       '--embed-thumbnail',
-      '--add-metadata'
+      '--convert-thumbnails', 'jpg',
+      '--add-metadata',
+      '--postprocessor-args', 'ffmpeg:-strict -2 -threads 0'
     );
   } else {
-    // Video
+    // Video - Prioritize MP4 container compatible streams and allow experimental opus muxing
+    ytdlpArgs.push('--postprocessor-args', 'ffmpeg:-strict -2 -threads 0');
     if (job.height && job.height > 0) {
       ytdlpArgs.push(
-        '-f', `bestvideo[height<=${job.height}]+bestaudio/best[height<=${job.height}]/best`,
+        '-f', `bestvideo*[height<=${job.height}][ext=mp4]+bestaudio[ext=m4a]/bestvideo*[height<=${job.height}]+bestaudio/best[height<=${job.height}]/best`,
         '--merge-output-format', 'mp4'
       );
     } else {
-      ytdlpArgs.push('-f', 'bestvideo+bestaudio/best', '--merge-output-format', 'mp4');
+      ytdlpArgs.push(
+        '-f', 'bestvideo*[ext=mp4]+bestaudio[ext=m4a]/bestvideo*+bestaudio/best',
+        '--merge-output-format', 'mp4'
+      );
     }
   }
 
-  ytdlpArgs.push('-o', outputPath, job.url);
+  let downloadTarget = job.url;
+  if (job.query) {
+    downloadTarget = `ytsearch1:${job.query}`;
+  } else if (job.url && (job.url.includes('spotify.com') || job.url.includes('spotify.link'))) {
+    const cleanSearch = `${job.title || 'Music Track'} ${job.artist || ''}`.replace(/[^\w\s]/gi, ' ').trim();
+    downloadTarget = `ytsearch1:${cleanSearch}`;
+  }
+
+  if (downloadTarget.startsWith('ytsearch')) {
+    ytdlpArgs.push('--playlist-items', '1');
+  }
+
+  ytdlpArgs.push('-o', outputPath, downloadTarget);
 
   console.log(`[Job ${job.id}] Executing: ${ytdlpPath} ${ytdlpArgs.slice(0, 8).join(' ')} ...`);
 
@@ -338,11 +357,27 @@ function executeJob(job) {
       return;
     }
 
-    if (code === 0 && fs.existsSync(outputPath) && fs.statSync(outputPath).size > 1024) {
+    let finalPath = outputPath;
+    if (!fs.existsSync(finalPath) || fs.statSync(finalPath).size < 1024) {
+      try {
+        const files = fs.readdirSync(tempDir);
+        const match = files.find(f => (f.startsWith(`job_${job.id}`) || f.startsWith(job.id)) && (f.endsWith('.mp4') || f.endsWith('.mp3') || f.endsWith('.m4a') || f.endsWith('.webm') || f.endsWith('.mkv')));
+        if (match) {
+          const mPath = path.join(tempDir, match);
+          if (fs.existsSync(mPath) && fs.statSync(mPath).size > 1024) {
+            finalPath = mPath;
+            job.outputFile = mPath;
+          }
+        }
+      } catch (_) {}
+    }
+
+    if (fs.existsSync(finalPath) && fs.statSync(finalPath).size > 1024) {
       job.status = 'completed';
       job.percentage = 100;
+      job.complete = true;
       job.message = 'Download ready!';
-      console.log(`[Job ${job.id}] Completed: ${outputPath}`);
+      console.log(`[Job ${job.id}] Completed: ${finalPath}`);
     } else {
       job.status = 'failed';
       job.error = classifyMediaError(stderrBuffer, code);

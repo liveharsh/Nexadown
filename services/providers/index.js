@@ -59,7 +59,7 @@ const genericProvider = {
         {
           id: 'audio-best',
           type: 'audio',
-          audioFormat: 'mp3',
+          audioFormat: 'mp3', ext: 'mp3',
           bitrate: '320k',
           label: 'Extracted Audio (320 kbps MP3)',
           badge: 'MP3',

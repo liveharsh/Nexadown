@@ -75,12 +75,12 @@ class YouTubeProvider {
 
     // Audio options
     const audioOptions = [
-      { id: 'audio-mp3-320', type: 'audio', audioFormat: 'mp3', bitrate: '320k', label: 'MP3 — 320 kbps (Master Studio)', badge: 'STUDIO', estimatedSize: `~${Math.round((320 * (durationSec || 180)) / (8 * 1024))} MB` },
-      { id: 'audio-mp3-256', type: 'audio', audioFormat: 'mp3', bitrate: '256k', label: 'MP3 — 256 kbps (High Fidelity)', badge: 'HIGH', estimatedSize: `~${Math.round((256 * (durationSec || 180)) / (8 * 1024))} MB` },
-      { id: 'audio-mp3-128', type: 'audio', audioFormat: 'mp3', bitrate: '128k', label: 'MP3 — 128 kbps (Standard Compact)', badge: 'STANDARD', estimatedSize: `~${Math.round((128 * (durationSec || 180)) / (8 * 1024))} MB` },
-      { id: 'audio-m4a',     type: 'audio', audioFormat: 'm4a', bitrate: '256k', label: 'M4A / AAC (Apple Lossless Quality)', badge: 'AAC', estimatedSize: `~${Math.round((256 * (durationSec || 180)) / (8 * 1024))} MB` },
-      { id: 'audio-wav',     type: 'audio', audioFormat: 'wav', bitrate: 'pcm',  label: 'WAV (Uncompressed PCM Lossless)', badge: 'WAV', estimatedSize: `~${Math.round((1411 * (durationSec || 180)) / (8 * 1024))} MB` },
-      { id: 'audio-flac',    type: 'audio', audioFormat: 'flac', bitrate: 'lossless', label: 'FLAC (Free Lossless Audio)', badge: 'FLAC', estimatedSize: `~${Math.round((800 * (durationSec || 180)) / (8 * 1024))} MB` }
+      { id: 'audio-mp3-320', type: 'audio', audioFormat: 'mp3', ext: 'mp3', bitrate: '320k', label: 'MP3 — 320 kbps (Master Studio)', badge: 'STUDIO', estimatedSize: `~${Math.round((320 * (durationSec || 180)) / (8 * 1024))} MB` },
+      { id: 'audio-mp3-256', type: 'audio', audioFormat: 'mp3', ext: 'mp3', bitrate: '256k', label: 'MP3 — 256 kbps (High Fidelity)', badge: 'HIGH', estimatedSize: `~${Math.round((256 * (durationSec || 180)) / (8 * 1024))} MB` },
+      { id: 'audio-mp3-128', type: 'audio', audioFormat: 'mp3', ext: 'mp3', bitrate: '128k', label: 'MP3 — 128 kbps (Standard Compact)', badge: 'STANDARD', estimatedSize: `~${Math.round((128 * (durationSec || 180)) / (8 * 1024))} MB` },
+      { id: 'audio-m4a',     type: 'audio', audioFormat: 'm4a', ext: 'm4a', bitrate: '256k', label: 'M4A / AAC (Apple Lossless Quality)', badge: 'AAC', estimatedSize: `~${Math.round((256 * (durationSec || 180)) / (8 * 1024))} MB` },
+      { id: 'audio-wav',     type: 'audio', audioFormat: 'wav', ext: 'wav', bitrate: 'pcm',  label: 'WAV (Uncompressed PCM Lossless)', badge: 'WAV', estimatedSize: `~${Math.round((1411 * (durationSec || 180)) / (8 * 1024))} MB` },
+      { id: 'audio-flac',    type: 'audio', audioFormat: 'flac', ext: 'flac', bitrate: 'lossless', label: 'FLAC (Free Lossless Audio)', badge: 'FLAC', estimatedSize: `~${Math.round((800 * (durationSec || 180)) / (8 * 1024))} MB` }
     ];
 
     // Subtitles

@@ -64,7 +64,7 @@ class InstagramProvider {
       {
         id: 'audio-mp3-320',
         type: 'audio',
-        audioFormat: 'mp3',
+        audioFormat: 'mp3', ext: 'mp3',
         bitrate: '320k',
         label: 'Original Reel Audio (320 kbps MP3)',
         badge: 'STUDIO',

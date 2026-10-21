@@ -27,6 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Modal Elements
   const progressModal = document.getElementById('progressModal');
   const modalCloseBtn = document.getElementById('modalCloseBtn');
+  const modalCancelJobBtn = document.getElementById('modalCancelJobBtn');
   const modalTitle = document.getElementById('modalTitle');
   const modalQualityText = document.getElementById('modalQualityText');
   const progressBarFill = document.getElementById('progressBarFill');
@@ -724,10 +725,11 @@ document.addEventListener('DOMContentLoaded', () => {
       activeEventSource.onmessage = (e) => {
         try {
           const job = JSON.parse(e.data);
-          const isComplete = job.complete || job.status === 'ready' || job.status === 'complete';
+          const isComplete = job.complete || job.status === 'ready' || job.status === 'complete' || job.status === 'completed';
           const isFailed = job.status === 'failed' || job.status === 'error';
 
           if (isComplete) {
+            activeJobId = null;
             if (activeEventSource) {
               activeEventSource.close();
               activeEventSource = null;
@@ -853,7 +855,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="format-size-tag">💾 ${sizeDisplay}</div>
         </div>
         <div class="format-badges-row">
-          <span class="format-badge" style="background: rgba(0, 242, 254, 0.2); color: #00f2fe;">${opt.ext.toUpperCase()}</span>
+          <span class="format-badge" style="background: rgba(0, 242, 254, 0.2); color: #00f2fe;">${(opt.ext || 'MP4').toUpperCase()}</span>
           ${opt.badge ? `<span class="format-badge badge-glow">${opt.badge}</span>` : ''}
           ${isImage ? '<span class="format-badge" style="background: rgba(254, 9, 121, 0.2); color: #fe0979;">HD PHOTO</span>' : '<span class="format-badge" style="background: rgba(121, 40, 202, 0.2); color: #c084fc;">⚡ SUBTITLES</span><span class="format-badge" style="background: rgba(16, 185, 129, 0.2); color: #10b981;">HD AUDIO</span>'}
         </div>
@@ -865,7 +867,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               ${isImage ? '<rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>' : '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line>'}
             </svg>
-            ${isImage ? 'Download Photo (HD JPG)' : `Download Video (${opt.quality || opt.ext.toUpperCase()})`}
+            ${isImage ? 'Download Photo (HD JPG)' : `Download Video (${opt.quality || (opt.ext || 'MP4').toUpperCase()})`}
           </button>
         </div>
       `;
@@ -1000,7 +1002,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="format-size-tag">💾 ${sizeDisplay}</div>
         </div>
         <div class="format-badges-row">
-          <span class="format-badge" style="background: rgba(0, 242, 254, 0.2); color: #00f2fe;">${opt.ext.toUpperCase()}</span>
+          <span class="format-badge" style="background: rgba(0, 242, 254, 0.2); color: #00f2fe;">${(opt.ext || opt.audioFormat || 'MP3').toUpperCase()}</span>
           ${opt.badge ? `<span class="format-badge badge-glow">${opt.badge}</span>` : ''}
           ${isMp3 ? `<span class="format-badge" style="background: rgba(121, 40, 202, 0.2); color: #c084fc;">SUBTITLES & ART</span>` : ''}
           <span class="format-badge" style="background: rgba(254, 9, 121, 0.2); color: #fe0979;">COVER ART EMBEDDED</span>
@@ -1015,7 +1017,7 @@ document.addEventListener('DOMContentLoaded', () => {
               <circle cx="6" cy="18" r="3"></circle>
               <circle cx="18" cy="16" r="3"></circle>
             </svg>
-            Download ${opt.ext.toUpperCase()} (${opt.quality || opt.audioFormat})
+            Download ${(opt.ext || opt.audioFormat || 'MP3').toUpperCase()} (${opt.quality || opt.audioFormat})
           </button>
         </div>
       `;
@@ -1029,7 +1031,7 @@ document.addEventListener('DOMContentLoaded', () => {
           audioBitrate: opt.audioBitrate,
           title: currentMetadata.title,
           artist: currentMetadata.uploader || currentMetadata.artist || '',
-          quality: opt.quality || `${opt.ext.toUpperCase()} Audio`,
+          quality: opt.quality || `${(opt.ext || opt.audioFormat || 'MP3').toUpperCase()} Audio`,
           size: sizeDisplay
         }, e.currentTarget);
       });
@@ -1106,7 +1108,7 @@ document.addEventListener('DOMContentLoaded', () => {
       `;
     }
 
-    showToast(`Downloading subtitle (${options.lang.toUpperCase()}) directly!`, '💬');
+    showToast(`Downloading subtitle (${(options.lang || 'EN').toUpperCase()}) directly!`, '💬');
     if (window.soundFx) window.soundFx.playSuccess();
 
     const params = new URLSearchParams({
@@ -1285,6 +1287,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       const jobId = data.jobId;
+      activeJobId = jobId;
 
       // Connect to Server-Sent Events (SSE) for Real-Time Progress Updates
       activeEventSource = new EventSource(`/api/download/progress/${jobId}`);
@@ -1292,7 +1295,7 @@ document.addEventListener('DOMContentLoaded', () => {
       activeEventSource.onmessage = (e) => {
         try {
           const job = JSON.parse(e.data);
-          const isComplete = job.complete || job.status === 'ready' || job.status === 'complete';
+          const isComplete = job.complete || job.status === 'ready' || job.status === 'complete' || job.status === 'completed';
           const isFailed = job.status === 'failed' || job.status === 'error';
 
           if (isComplete) {
@@ -1329,6 +1332,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             showToast(`✓ Download ready: ${safeDownloadFilename}`, '💾');
           } else if (isFailed) {
+            activeJobId = null;
             if (activeEventSource) {
               activeEventSource.close();
               activeEventSource = null;
@@ -1452,15 +1456,25 @@ document.addEventListener('DOMContentLoaded', () => {
     if (modalActions) modalActions.style.display = 'none';
   }
 
+  if (modalCancelJobBtn) {
+    modalCancelJobBtn.addEventListener('click', () => {
+      cancelActiveJob();
+    });
+  }
+
   if (modalCloseBtn) {
     modalCloseBtn.addEventListener('click', () => {
-      if (activeEventSource) {
-        activeEventSource.close();
-        activeEventSource = null;
+      if (activeJobId) {
+        cancelActiveJob();
+      } else {
+        if (activeEventSource) {
+          activeEventSource.close();
+          activeEventSource = null;
+        }
+        resetModalVisuals();
+        if (progressModal) progressModal.classList.remove('active');
+        if (window.soundFx) window.soundFx.playClick();
       }
-      resetModalVisuals();
-      if (progressModal) progressModal.classList.remove('active');
-      if (window.soundFx) window.soundFx.playClick();
     });
   }
 

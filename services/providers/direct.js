@@ -63,7 +63,7 @@ class DirectStreamProvider {
         {
           id: 'direct-audio',
           type: 'audio',
-          audioFormat: 'mp3',
+          audioFormat: 'mp3', ext: 'mp3',
           bitrate: '320k',
           label: 'Extract Audio (320 kbps MP3)',
           badge: 'MP3',
