@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>NEXADOWN 3D — Ultra Media Downloader</title>
+  <meta name="description" content="Download YouTube, Spotify, Instagram, TikTok, SoundCloud videos and music in 4K MP4 or 320kbps MP3 with embedded lyrics and HD cover art.">
+  <meta name="theme-color" content="#060810">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Three.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="css/style.css?v=2.2">
+</head>
+<body data-theme="neon">
+
+  <!-- Custom Cyberpunk Cursor -->
+  <div id="cursor-dot" class="cursor-dot"></div>
+  <div id="cursor-ring" class="cursor-ring"></div>
+
+  <!-- Ambient Glowing Orbs -->
+  <div class="ambient-glow ambient-glow-1"></div>
+  <div class="ambient-glow ambient-glow-2"></div>
+  <div class="ambient-glow ambient-glow-3"></div>
+
+  <!-- WebGL 3D Background -->
+  <div id="three-canvas-container"></div>
+
+  <!-- App Shell -->
+  <div class="app-container">
+
+    <!-- ── NAVIGATION ── -->
+    <header class="navbar">
+      <div class="nav-wrapper">
+
+        <a href="#hero" class="brand-logo">
+          <div class="brand-icon-3d">⚡</div>
+          <div class="brand-title">NEXADOWN<span class="brand-tag">3D</span></div>
+        </a>
+
+        <ul class="nav-links" id="navLinks">
+          <li><a href="#hero"       class="nav-link active">Downloader</a></li>
+          <li><a href="#categories" class="nav-link">Tools</a></li>
+          <li><a href="#converter"  class="nav-link">Converter</a></li>
+          <li><a href="#formats"    class="nav-link">Formats</a></li>
+          <li><a href="#about"      class="nav-link">About</a></li>
+          <li><a href="#privacy"    class="nav-link">Privacy</a></li>
+        </ul>
+
+        <div class="nav-actions">
+          <button class="icon-btn" id="soundToggleBtn"  title="Toggle Sound FX">🔊</button>
+          <button class="icon-btn" id="themeToggleBtn"  title="Cycle Color Theme">🎨</button>
+          <a href="#converter" class="nav-btn-highlight">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+            Convert File
+          </a>
+          <button class="icon-btn mobile-menu-toggle" id="mobileToggleBtn">☰</button>
+        </div>
+
+      </div>
+    </header>
+
+    <!-- ── MAIN ── -->
+    <main>
+
+      <!-- HERO SECTION -->
+      <section class="hero-section" id="hero">
+
+        <div class="hero-pill-badge">
+          <span>✨</span> NEXT-GEN ULTRA MEDIA DOWNLOADER
+        </div>
+
+        <h1 class="hero-heading">
+          DOWNLOAD YOUR MEDIA.<br>
+          <span class="gradient-text">INSTANTLY. FREE.</span>
+        </h1>
+
+        <p class="hero-subtitle">
+          Paste any YouTube, Spotify, Instagram, TikTok, SoundCloud, Twitter/X or direct media link to download in 320 kbps MP3 or 4K MP4 — with embedded lyrics &amp; HD cover art.
+        </p>
+
+        <!-- URL INPUT BOX -->
+        <div class="analyzer-wrapper">
+          <div class="analyzer-box">
+            <div class="input-main-row">
+              <div class="input-icon-chain">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                </svg>
+              </div>
+              <input
+                type="text"
+                id="urlInput"
+                class="analyzer-input"
+                placeholder="Paste YouTube, Spotify, Instagram, TikTok, SoundCloud, or any video link..."
+                autocomplete="off"
+                spellcheck="false"
+                inputmode="url"
+              >
+              <button class="btn-clear" id="btnClear" title="Clear" type="button">✕</button>
+            </div>
+
+            <div class="input-btn-group">
+              <button class="btn-paste" id="btnPaste" type="button">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+                  <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+                </svg>
+                <span>📋 Paste</span>
+              </button>
+              <button class="btn-analyze" id="btnAnalyze" type="button">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="11" cy="11" r="8"/>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <span>Analyze &amp; Download</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- PLATFORM PILLS -->
+        <div class="platform-quick-selector">
+          <div class="platform-pill" data-platform="YouTube">
+            <span style="color:#ff0033;">▶</span> YouTube 4K / MP3
+          </div>
+          <div class="platform-pill" data-platform="Spotify">
+            <span style="color:#1db954;">♪</span> Spotify Music
+          </div>
+          <div class="platform-pill" data-platform="Instagram">
+            <span style="color:#e1306c;">📷</span> Instagram Reels
+          </div>
+          <div class="platform-pill" data-platform="TikTok">
+            <span style="color:#00f2fe;">♬</span> TikTok Clean
+          </div>
+          <div class="platform-pill" data-platform="Twitter/X">
+            <span style="color:#1da1f2;">𝕏</span> Twitter / X
+          </div>
+          <div class="platform-pill" data-platform="SoundCloud">
+            <span style="color:#ff5500;">☁</span> SoundCloud
+          </div>
+          <div class="platform-pill" data-platform="Direct Link">
+            <span style="color:#00f5d4;">🔗</span> Direct .mp4 / .webm
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ── RESULTS PANEL ── -->
+      <section class="results-section" id="resultsSection">
+        <div class="results-card">
+
+          <!-- Media Header -->
+          <div class="media-header-grid">
+            <div class="media-preview-box">
+              <img id="mediaThumbnail" class="media-thumbnail-img" src="" alt="Media Thumbnail" loading="lazy">
+              <span id="mediaDuration" class="media-duration-badge">00:00</span>
+            </div>
+
+            <div class="media-details">
+              <span id="mediaPlatformTag" class="media-platform-tag">YouTube</span>
+              <h2 id="mediaTitle" class="media-title">Analyzing…</h2>
+              <div class="media-meta-row">
+                <div class="meta-item">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                  </svg>
+                  <span id="mediaUploader">Creator</span>
+                </div>
+                <div class="meta-item">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                  <span id="mediaViews">Views</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Format Tabs -->
+          <div class="tabs-nav">
+            <button class="tab-btn active" data-tab="video">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="23 7 16 12 23 17 23 7"/>
+                <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+              </svg>
+              <span>Video + Subtitles</span>
+            </button>
+            <button class="tab-btn" data-tab="audio">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 18V5l12-2v13"/>
+                <circle cx="6" cy="18" r="3"/>
+                <circle cx="18" cy="16" r="3"/>
+              </svg>
+              <span>Audio + Art</span>
+            </button>
+            <button class="tab-btn" data-tab="subtitles">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+              </svg>
+              <span>Subtitles .SRT</span>
+            </button>
+            <button class="tab-btn" data-tab="thumbnail">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <polyline points="21 15 16 10 5 21"/>
+              </svg>
+              <span>Cover Art</span>
+            </button>
+          </div>
+
+          <!-- Format Lists -->
+          <div id="videoFormatsList"    class="format-options-list"></div>
+          <div id="audioFormatsList"    class="format-options-list" style="display:none;"></div>
+          <div id="thumbnailFormatList" class="format-options-list" style="display:none;"></div>
+          <div id="subtitlesFormatList" class="format-options-list" style="display:none;"></div>
+
+          <!-- Spotify Playlist Container -->
+          <div id="playlistContainer" style="display:none;">
+            <div class="playlist-header-bar">
+              <div class="playlist-search-box">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="11" cy="11" r="8"/>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <input type="text" id="playlistSearchInput" class="playlist-search-input" placeholder="Search song title or artist...">
+              </div>
+              <span id="playlistTrackCountBadge" class="playlist-count-badge">0 Tracks</span>
+              <button id="btnDownloadAllPlaylist" class="btn-playlist-all-dl" type="button" title="Download all songs zipped into a folder">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                <span id="btnDownloadAllText">⚡ Download All (ZIP Folder)</span>
+              </button>
+            </div>
+
+            <!-- Selection Sub-bar -->
+            <div class="playlist-selection-bar">
+              <label class="select-all-label">
+                <input type="checkbox" id="selectAllPlaylistTracks" checked>
+                <span>Select All</span>
+              </label>
+              <div class="selection-actions">
+                <span id="selectedCountBadge" class="selected-count-text">0 of 0 selected</span>
+              </div>
+            </div>
+
+            <div id="playlistTracksList" class="playlist-tracks-grid"></div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ── CATEGORY CARDS ── -->
+      <section class="categories-section" id="categories">
+        <div class="section-header">
+          <h2 class="section-title">ENGINE CORES &amp; TOOLS</h2>
+          <p class="section-subtitle">Dedicated high-speed extraction modules engineered for precision</p>
+        </div>
+
+        <div class="cards-grid">
+
+          <!-- YouTube -->
+          <div class="card-3d">
+            <div>
+              <span class="card-badge">4K ULTRA HD</span>
+              <div class="card-icon-art youtube">▶</div>
+              <h3 class="card-title">YouTube Downloader</h3>
+              <p class="card-desc">Download public videos in pristine 1080p, 2K, and 4K MP4 with full high-fidelity audio &amp; auto-embedded subtitles.</p>
+              <ul class="card-features">
+                <li class="card-feature-item">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  Resolutions: 4K · 1440p · 1080p · 720p
+                </li>
+                <li class="card-feature-item">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  60 FPS Smooth Playback Support
+                </li>
+                <li class="card-feature-item">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  Auto-Subtitle Embed in MP4
+                </li>
+              </ul>
+            </div>
+            <a href="#hero" class="card-btn">Use YouTube Core →</a>
+          </div>
+
+          <!-- Instagram -->
+          <div class="card-3d">
+            <div>
+              <span class="card-badge">REELS &amp; POSTS</span>
+              <div class="card-icon-art instagram">📷</div>
+              <h3 class="card-title">Instagram Media</h3>
+              <p class="card-desc">Save Instagram Reels, public video posts, and carousel content in original studio-quality resolution.</p>
+              <ul class="card-features">
+                <li class="card-feature-item">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  Reels · Stories · Feed Videos
+                </li>
+                <li class="card-feature-item">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  No Quality Compression
+                </li>
+                <li class="card-feature-item">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  Direct MP4 File Output
+                </li>
+              </ul>
+            </div>
+            <a href="#hero" class="card-btn">Use Instagram Core →</a>
+          </div>
+
+          <!-- Universal -->
+          <div class="card-3d">
+            <div>
+              <span class="card-badge">UNIVERSAL</span>
+              <div class="card-icon-art videolink">🔗</div>
+              <h3 class="card-title">Video Link Downloader</h3>
+              <p class="card-desc">Universal parser supporting TikTok, Twitter/X, Facebook, Vimeo, Reddit, Twitch, Dailymotion &amp; direct URL streams.</p>
+              <ul class="card-features">
+                <li class="card-feature-item">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  TikTok (Clean · No Watermark)
+                </li>
+                <li class="card-feature-item">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  Direct .mp4 · .webm · HLS Streams
+                </li>
+                <li class="card-feature-item">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  1000+ Authorized Web Sources
+                </li>
+              </ul>
+            </div>
+            <a href="#hero" class="card-btn">Use Universal Core →</a>
+          </div>
+
+          <!-- Audio -->
+          <div class="card-3d">
+            <div>
+              <span class="card-badge">FFMPEG POWERED</span>
+              <div class="card-icon-art converter">🎧</div>
+              <h3 class="card-title">Audio + Spotify</h3>
+              <p class="card-desc">Extract crystal-clear audio from any video or Spotify link. Embedded cover art &amp; lyrics. Supports 320kbps MP3, WAV, FLAC, M4A.</p>
+              <ul class="card-features">
+                <li class="card-feature-item">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  MP3 320kbps · FLAC · WAV · M4A
+                </li>
+                <li class="card-feature-item">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  Embedded Album Art &amp; Lyrics
+                </li>
+                <li class="card-feature-item">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  Spotify Track Search Support
+                </li>
+              </ul>
+            </div>
+            <a href="#converter" class="card-btn">Use Audio Core →</a>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ── LOCAL CONVERTER ── -->
+      <section class="converter-section" id="converter">
+        <div class="section-header">
+          <h2 class="section-title">LOCAL FILE CONVERTER</h2>
+          <p class="section-subtitle">Drag &amp; drop your own media files for instant FFmpeg hardware-accelerated conversion</p>
+        </div>
+
+        <div class="drop-zone" id="dropZone">
+          <div class="drop-zone-icon">📁</div>
+          <div id="dropZonePrompt">
+            <h3 style="font-family:var(--font-h);font-size:1.2rem;margin-bottom:.45rem;">
+              Drop your video or audio file here
+            </h3>
+            <p style="color:var(--text-3);font-size:.88rem;">
+              Supports MP4 · MKV · AVI · MOV · WEBM · WAV · FLAC · M4A · OGG — up to 250 MB
+            </p>
+          </div>
+          <input type="file" id="localFileInput" style="display:none;" accept="video/*,audio/*">
+        </div>
+
+        <div class="converter-controls">
+          <div>
+            <label style="font-size:.82rem;color:var(--text-2);display:block;margin-bottom:.32rem;">Target Format</label>
+            <select id="localTargetFormat" class="select-control">
+              <option value="mp3">MP3 (MPEG Audio Layer III)</option>
+              <option value="wav">WAV (Uncompressed PCM Lossless)</option>
+              <option value="m4a">M4A / AAC (Apple Quality)</option>
+              <option value="flac">FLAC (Free Lossless)</option>
+              <option value="ogg">OGG (Vorbis Audio)</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:.82rem;color:var(--text-2);display:block;margin-bottom:.32rem;">Bitrate / Quality</label>
+            <select id="localBitrate" class="select-control">
+              <option value="320k">320 kbps — Studio Quality</option>
+              <option value="256k">256 kbps — High Fidelity</option>
+              <option value="192k">192 kbps — Standard</option>
+              <option value="128k">128 kbps — Compact</option>
+            </select>
+          </div>
+          <button id="btnConvertLocal" class="btn-analyze" style="margin-top:1.25rem;" disabled>
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="23 4 23 10 17 10"/>
+              <polyline points="1 20 1 14 7 14"/>
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+            </svg>
+            Convert &amp; Save
+          </button>
+        </div>
+
+        <div id="converterStatus"></div>
+      </section>
+
+      <!-- ── SUPPORTED FORMATS ── -->
+      <section class="page-container" id="formats">
+        <div class="legal-card">
+          <h2>⚡ Supported Formats &amp; Capabilities</h2>
+          <p>NEXADOWN 3D is powered by a high-throughput standalone engine capable of analyzing and extracting video and audio streams:</p>
+
+          <h3>🎬 Video Streams</h3>
+          <ul>
+            <li><strong>4K Ultra HD (2160p):</strong> High-bitrate H.264 / AV1 with AAC audio.</li>
+            <li><strong>2K Quad HD (1440p):</strong> Pristine quality for high-resolution monitors.</li>
+            <li><strong>Full HD (1080p @ 60fps):</strong> The worldwide streaming standard.</li>
+            <li><strong>HD (720p):</strong> Lightweight, optimized for mobile devices.</li>
+            <li><strong>SD (480p &amp; 360p):</strong> Low-bandwidth fast-saving formats.</li>
+          </ul>
+
+          <h3>🎵 Audio Streams</h3>
+          <ul>
+            <li><strong>MP3 (320 kbps):</strong> CBR maximum bitrate with embedded lyrics &amp; cover art.</li>
+            <li><strong>WAV (16-bit PCM):</strong> Uncompressed studio waveform for DAWs.</li>
+            <li><strong>M4A / AAC:</strong> Native container for iOS, macOS, and Android.</li>
+            <li><strong>FLAC:</strong> Lossless compressed audio with 100% fidelity.</li>
+          </ul>
+
+          <h3>🌐 Supported Platforms</h3>
+          <ul>
+            <li>YouTube · Spotify · Instagram · TikTok · Twitter/X · Facebook</li>
+            <li>SoundCloud · Reddit · Twitch · Dailymotion · Vimeo · Bandcamp</li>
+            <li>Direct .mp4 / .webm / .m3u8 / .mkv links</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- ── ABOUT ── -->
+      <section class="page-container" id="about">
+        <div class="legal-card">
+          <h2>🌐 About NEXADOWN 3D</h2>
+          <p>NEXADOWN 3D was created to provide creators, students, and digital media researchers with a modern, high-aesthetic interface for saving authorized online content.</p>
+          <p>Unlike ad-ridden spam sites, NEXADOWN runs entirely with clean software engineering principles:</p>
+          <ul>
+            <li>Zero intrusive popup ads or spam trackers.</li>
+            <li>Direct WebGL 3D GPU-accelerated visualization using Three.js.</li>
+            <li>Server-Sent Events (SSE) providing transparent, real-time download telemetry.</li>
+            <li>Standalone processing engine with zero third-party cloud dependencies.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- ── PRIVACY ── -->
+      <section class="page-container" id="privacy">
+        <div class="legal-card">
+          <h2>🔒 Privacy Policy</h2>
+          <p><strong>Last Updated: October 2026</strong></p>
+          <p>At NEXADOWN, user privacy is built into our core architecture:</p>
+          <ul>
+            <li><strong>Zero Activity Logs:</strong> We do not log, sell, or monitor the media URLs you analyze.</li>
+            <li><strong>Ephemeral Cleanup:</strong> Temporary files are auto-deleted after 15 minutes.</li>
+            <li><strong>No Tracking Cookies:</strong> All preferences are stored in your browser's private <code>localStorage</code>.</li>
+            <li><strong>Anti-SSRF Protection:</strong> Internal network ranges are strictly locked down.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- ── TERMS ── -->
+      <section class="page-container" id="terms">
+        <div class="legal-card">
+          <h2>📜 Terms of Service</h2>
+          <p>By using NEXADOWN 3D, you agree to comply with all applicable laws and regulations:</p>
+          <ul>
+            <li><strong>Authorized Use Only:</strong> For content you own, have permission to save, or that is Creative Commons / Public Domain.</li>
+            <li><strong>No DRM Circumvention:</strong> NEXADOWN does not bypass DRM, paywalls, or private restricted accounts.</li>
+            <li><strong>Fair Use:</strong> You agree not to distribute or commercialize copyrighted material without authorization.</li>
+          </ul>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- ── FOOTER ── -->
+    <footer class="footer" id="contact">
+      <div class="footer-grid">
+
+        <div class="footer-brand">
+          <div class="brand-logo" style="margin-bottom:.5rem;">
+            <div class="brand-icon-3d">⚡</div>
+            <div class="brand-title">NEXADOWN<span class="brand-tag">3D</span></div>
+          </div>
+          <p>Ultra-fast, futuristic 3D media extraction and audio conversion engine.</p>
+          <div style="display:flex;gap:.5rem;margin-top:.9rem;">
+            <span class="platform-pill" style="font-size:.73rem;">Engine: v2026.08</span>
+            <span class="platform-pill" style="font-size:.73rem;">FFmpeg: Ready</span>
+          </div>
+        </div>
+
+        <div class="footer-col">
+          <h4>Navigation</h4>
+          <ul class="footer-links">
+            <li><a href="#hero">Home Dashboard</a></li>
+            <li><a href="#categories">Download Tools</a></li>
+            <li><a href="#converter">Audio Converter</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Information</h4>
+          <ul class="footer-links">
+            <li><a href="#formats">Supported Formats</a></li>
+            <li><a href="#about">About Platform</a></li>
+            <li><a href="#privacy">Privacy Policy</a></li>
+            <li><a href="#terms">Terms of Service</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Status</h4>
+          <p style="color:var(--text-2);font-size:.86rem;margin-bottom:.65rem;">
+            Core Engine: <span style="color:#00ff88;font-weight:700;">● Online &amp; Stable</span>
+          </p>
+          <p style="color:var(--text-3);font-size:.8rem;">
+            High-speed stream pipes configured for local processing.
+          </p>
+        </div>
+
+      </div>
+
+      <div class="footer-bottom">
+        <div>© 2026 NEXADOWN 3D — All rights reserved. Built for authorized media workflows.</div>
+        <div>Engineered with Three.js WebGL &amp; Node.js</div>
+      </div>
+    </footer>
+
+  </div><!-- /app-container -->
+
+  <!-- Mobile Bottom Dock -->
+  <nav class="mobile-bottom-dock">
+    <a href="#hero" class="dock-item active">
+      <div class="dock-icon">⚡</div>
+      <span>Download</span>
+    </a>
+    <a href="#categories" class="dock-item">
+      <div class="dock-icon">🧰</div>
+      <span>Tools</span>
+    </a>
+    <a href="#converter" class="dock-item">
+      <div class="dock-icon">🎧</div>
+      <span>Convert</span>
+    </a>
+    <button class="dock-item" id="mobileThemeBtn" type="button">
+      <div class="dock-icon">🎨</div>
+      <span>Theme</span>
+    </button>
+    <button class="dock-item" id="mobileSoundBtn" type="button">
+      <div class="dock-icon" id="mobileSoundIcon">🔊</div>
+      <span>Sound</span>
+    </button>
+  </nav>
+
+  <!-- Download Progress Modal -->
+  <div class="modal-overlay" id="progressModal">
+    <div class="modal-dialog">
+      <button class="modal-close-btn" id="modalCloseBtn" title="Close" type="button">✕</button>
+
+      <div class="modal-header-3d">
+        <div class="modal-cover-wrapper" id="modalCoverWrapper" style="display:none;">
+          <img id="modalCoverImg" class="modal-cover-img" src="" alt="Album Artwork">
+        </div>
+        <div class="modal-icon-pulse" id="modalDefaultIcon">⚡</div>
+        <h3 class="modal-title" id="modalTitle">Downloading Media…</h3>
+        <p class="modal-subtitle" id="modalQualityText">Processing stream &amp; embedding subtitles</p>
+      </div>
+
+      <div class="progress-track">
+        <div class="progress-fill" id="progressBarFill" style="width:0%"></div>
+      </div>
+      <div class="progress-percent-row">
+        <span class="progress-status-badge" id="progressStatusText">Extracting media…</span>
+        <span class="progress-number" id="progressNumber">0%</span>
+      </div>
+
+      <div class="modal-metrics-grid">
+        <div class="metric-card">
+          <span class="metric-label">⚡ Speed</span>
+          <span class="metric-value" id="modalSpeed">0 KiB/s</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">💾 Size</span>
+          <span class="metric-value" id="modalSize">-- / --</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">⏱ ETA</span>
+          <span class="metric-value" id="modalEta">--:--</span>
+        </div>
+      </div>
+
+      <div class="modal-steps-list">
+        <div class="modal-step active" id="step1">
+          <span class="step-icon">●</span> Downloading video/audio stream
+        </div>
+        <div class="modal-step" id="step2">
+          <span class="step-icon">●</span> Embedding subtitles &amp; album artwork
+        </div>
+        <div class="modal-step" id="step3">
+          <span class="step-icon">●</span> Finalizing &amp; sending to device
+        </div>
+      </div>
+
+            <div class="modal-cancel-row" style="margin-top:14px; text-align:center;">
+        <button type="button" id="modalCancelJobBtn" class="btn-ghost-cancel" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);color:#aaa;padding:7px 18px;border-radius:8px;font-size:0.82rem;cursor:pointer;transition:all 0.2s ease;">
+          ✕ Cancel Download
+        </button>
+      </div>
+
+      <div class="modal-actions" id="modalActions" style="display:none;">
+        <a id="btnSaveReadyFile" class="btn-save-ready" href="#" download>
+          ✓ Download Complete! Click if not auto-started
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hidden iframe for native downloads -->
+  <iframe id="hidden-download-iframe" style="display:none;"></iframe>
+
+  <!-- Scripts -->
+  <script src="js/three-scene.js?v=2.2"></script>
+  <script src="js/audio-fx.js?v=2.2"></script>
+  <script src="js/app.js?v=2.2"></script>
+</body>
+</html>

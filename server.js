@@ -80,9 +80,15 @@ const apiRateLimiter = createRateLimiter({
 app.use('/api/', apiRateLimiter);
 
 // Serve frontend static assets
+// Serve frontend static assets with no-cache headers for dev & real-time updates
 app.use(express.static(path.join(__dirname, 'public'), {
-  maxAge: '1d',
-  etag: true
+  etag: false,
+  maxAge: 0,
+  setHeaders: (res, filePath) => {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+  }
 }));
 
 // Mount API Routes

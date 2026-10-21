@@ -21,6 +21,6 @@ if not exist "bin\yt-dlp.exe" (
 echo.
 echo Launching NEXADOWN 3D Web Server...
 start "" http://localhost:3000
-node src/server.js
+node server.js
 
 pause
