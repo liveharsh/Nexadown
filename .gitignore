@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Temporary download files and runtime caches
+temp/
+*.mp4
+*.mp3
+*.webm
+*.mkv
+*.wav
+*.part
+*.ytdl
+
+# Executables & Binaries (setup-engine will download these automatically)
+bin/
+*.exe
+
+# Logs & environment
+*.log
+.env
+.DS_Store
+Thumbs.db
