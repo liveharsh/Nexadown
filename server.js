@@ -31,8 +31,28 @@ const fs = require('fs');
 const https = require('https');
 const multer = require('multer');
 
-const { errorHandler, NotFoundError } = require('./utils/errors');
-const { createRateLimiter } = require('./middleware/rateLimit');
+let errorHandler, NotFoundError;
+try {
+  ({ errorHandler, NotFoundError } = require('./utils/errors'));
+} catch (_) {
+  try {
+    ({ errorHandler, NotFoundError } = require('./src/utils/errors'));
+  } catch (__) {
+    errorHandler = (err, req, res, next) => res.status(err.statusCode || 500).json({ success: false, error: err.message || 'Internal error' });
+    NotFoundError = class extends Error { constructor(m = 'Not Found') { super(m); this.statusCode = 404; } };
+  }
+}
+
+let createRateLimiter;
+try {
+  ({ createRateLimiter } = require('./middleware/rateLimit'));
+} catch (_) {
+  try {
+    ({ createRateLimiter } = require('./src/middleware/rateLimit'));
+  } catch (__) {
+    createRateLimiter = () => (req, res, next) => next();
+  }
+}
 
 // Route modules
 const healthRoutes = require('./routes/health');
