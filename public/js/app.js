@@ -1337,10 +1337,30 @@ document.addEventListener('DOMContentLoaded', () => {
               activeEventSource.close();
               activeEventSource = null;
             }
-            if (progressStatusText) progressStatusText.textContent = `❌ ${job.error || 'Download failed'}`;
             if (progressBarFill) progressBarFill.style.background = '#fe0979';
             if (modalSpeed) modalSpeed.textContent = 'Failed';
             if (window.soundFx) window.soundFx.playError();
+
+            const isDatacenterBot = job.error && (job.error.includes('datacenter IP') || job.error.includes('cookies.txt') || job.error.includes('bot check'));
+            if (isDatacenterBot && progressStatusText) {
+              const originalUrl = currentMetadata?.originalUrl || (urlInput ? urlInput.value.trim() : '');
+              const partnerUrl = `https://en.savefrom.net/#url=${encodeURIComponent(originalUrl)}`;
+              progressStatusText.innerHTML = `
+                <div style="font-size: 0.85rem; color: #ff9999; margin-bottom: 8px;">
+                  ⚠️ YouTube anti-bot triggered on cloud datacenter IP.
+                </div>
+                <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 6px;">
+                  <a href="${partnerUrl}" target="_blank" rel="noopener noreferrer" style="background: linear-gradient(135deg, #00f2fe, #4facfe); color: #000; padding: 6px 14px; border-radius: 6px; font-weight: 700; text-decoration: none; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 5px;">
+                    ⚡ Direct 1-Click Download
+                  </a>
+                  <a href="http://localhost:3000" target="_blank" rel="noopener noreferrer" style="background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.3); padding: 6px 14px; border-radius: 6px; font-weight: 600; text-decoration: none; font-size: 0.8rem;">
+                    💻 Open Local PC Downloader
+                  </a>
+                </div>
+              `;
+            } else if (progressStatusText) {
+              progressStatusText.textContent = `❌ ${job.error || 'Download failed'}`;
+            }
           } else {
             // In progress (downloading, processing, initializing)
             const rawPct = job.percentage !== undefined ? job.percentage : (job.progress || 0);
