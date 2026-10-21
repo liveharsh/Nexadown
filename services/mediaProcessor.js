@@ -9,11 +9,15 @@ const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
 const { NotFoundError, AppError } = require('../utils/errors');
 
+const os = require('os');
+const isServerless = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
 const binDir = path.join(__dirname, '..', 'bin');
-const tempDir = path.join(__dirname, '..', 'temp');
-if (!fs.existsSync(tempDir)) {
-  fs.mkdirSync(tempDir, { recursive: true });
-}
+const tempDir = isServerless ? path.join(os.tmpdir(), 'nexadown') : path.join(__dirname, '..', 'temp');
+try {
+  if (!fs.existsSync(tempDir)) {
+    fs.mkdirSync(tempDir, { recursive: true });
+  }
+} catch (_) {}
 
 const isWindows = process.platform === 'win32';
 const ytdlpBinaryName = isWindows ? 'yt-dlp.exe' : 'yt-dlp';

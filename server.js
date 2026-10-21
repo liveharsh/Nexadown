@@ -65,12 +65,16 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const HOST = '0.0.0.0';
 
-// Ensure required directories exist
-const tempDir = path.join(__dirname, 'temp');
+// Ensure required directories exist (Serverless / Read-Only Filesystem Safe)
+const os = require('os');
+const isServerless = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
+const tempDir = isServerless ? path.join(os.tmpdir(), 'nexadown') : path.join(__dirname, 'temp');
 const uploadDir = path.join(tempDir, 'uploads');
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
+try {
+  if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+  }
+} catch (_) {}
 
 // Multer upload config for local file conversion (max 250MB)
 const storage = multer.diskStorage({
