@@ -39,7 +39,7 @@ if not "%NEW_URL%"=="" (
 echo.
 echo [2/3] Uploading code to GitHub (main branch)...
 git branch -M main
-git push -u origin main
+git push -u origin main --force
 
 if %ERRORLEVEL% EQU 0 (
     echo.
