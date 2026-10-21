@@ -34,7 +34,7 @@ function getBinaryCandidates() {
       {
         fileName: 'yt-dlp.exe',
         url: 'https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe',
-        minSize: 10 * 1024 * 1024
+        minSize: 2 * 1024 * 1024
       }
     ];
   }
@@ -44,7 +44,7 @@ function getBinaryCandidates() {
       {
         fileName: 'yt-dlp',
         url: 'https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_macos',
-        minSize: 10 * 1024 * 1024
+        minSize: 2 * 1024 * 1024
       },
       {
         fileName: 'yt-dlp',
@@ -62,7 +62,7 @@ function getBinaryCandidates() {
     {
       fileName: 'yt-dlp',
       url: `https://github.com/yt-dlp/yt-dlp/releases/latest/download/${linuxStandalone}`,
-      minSize: 10 * 1024 * 1024
+      minSize: 2 * 1024 * 1024
     },
     {
       fileName: 'yt-dlp',

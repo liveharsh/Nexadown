@@ -12,8 +12,9 @@ temp/
 *.part
 *.ytdl
 
-# Executables & Binaries (setup-engine will download these automatically)
-bin/
+# Executables & Binaries (track Linux yt-dlp binary)
+bin/*
+!bin/yt-dlp
 *.exe
 
 # Logs & environment
