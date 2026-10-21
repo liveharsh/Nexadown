@@ -21,3 +21,5 @@ bin/
 .env
 .DS_Store
 Thumbs.db
+
+cookies.txt
