@@ -98,7 +98,7 @@ function getYtDlpBaseArgs() {
     '--fragment-retries', '5',
     '--js-runtimes', `node:${nodeBinary}`,
     '--remote-components', 'ejs:github',
-    '--extractor-args', 'youtube:player_client=android_embedded,web_embedded,android,web;player_skip=configs',
+    '--extractor-args', 'youtube:player_client=visionos,web,android',
     '--add-header', 'User-Agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36',
     '--add-header', 'Accept-Language:en-US,en;q=0.9'
   ];
@@ -322,7 +322,7 @@ function executeJob(job) {
     ytdlpArgs.push('--postprocessor-args', 'ffmpeg:-strict -2 -threads 0');
     if (job.height && job.height > 0) {
       ytdlpArgs.push(
-        '-f', `bestvideo*[height<=${job.height}][ext=mp4]+bestaudio[ext=m4a]/bestvideo*[height<=${job.height}]+bestaudio/best[height<=${job.height}]/best`,
+        '-f', `bestvideo*[height<=${job.height}][ext=mp4]+bestaudio[ext=m4a]/bestvideo*[height<=${job.height}]+bestaudio/best[height<=${job.height}]/bestvideo*+bestaudio/best`,
         '--merge-output-format', 'mp4'
       );
     } else {
@@ -394,11 +394,88 @@ function executeJob(job) {
       job.complete = true;
       job.message = 'Download ready!';
       console.log(`[Job ${job.id}] Completed: ${finalPath}`);
+      processQueue();
+    } else if (!job.fallbackAttempted && (job.title || (job.url && (job.url.includes('youtube') || job.url.includes('youtu.be'))))) {
+      job.fallbackAttempted = true;
+      job.message = 'Resolving alternate stream for restricted media...';
+      job.percentage = 20;
+      console.warn(`[Job ${job.id}] Direct stream failed (${code}). Attempting alternate stream fallback for: ${job.title || job.url}`);
+
+      const cleanSearch = (job.title || '')
+        .replace(/[^\w\s-]/gi, ' ')
+        .replace(/\b(official video|official audio|music video|lyric video|spider-man|into the spider-verse)\b/gi, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+      const searchQuery = cleanSearch.length > 3 ? cleanSearch : (job.title || 'media');
+
+      const retryArgs = [
+        ...getYtDlpBaseArgs(),
+        '--postprocessor-args', 'ffmpeg:-strict -2 -threads 0',
+        '-f', 'bestvideo*[height<=1080]+bestaudio/best[height<=1080]/bestvideo*+bestaudio/best',
+        '--merge-output-format', 'mp4',
+        '--playlist-items', '1',
+        '-o', outputPath,
+        `ytsearch1:${searchQuery}`
+      ];
+
+      const retryChild = spawn(ytdlpPath, retryArgs);
+      job.childProcess = retryChild;
+      let retryStderr = '';
+
+      retryChild.stdout.on('data', chunk => parseProgress(job, chunk.toString()));
+      retryChild.stderr.on('data', chunk => {
+        retryStderr += chunk.toString();
+        parseProgress(job, chunk.toString());
+      });
+
+      retryChild.on('close', retryCode => {
+        job.childProcess = null;
+        if (job.status === 'cancelled') { processQueue(); return; }
+
+        let rPath = outputPath;
+        if (!fs.existsSync(rPath) || fs.statSync(rPath).size < 1024) {
+          try {
+            const files = fs.readdirSync(tempDir);
+            const match = files.find(f => (f.startsWith(`job_${job.id}`) || f.startsWith(job.id)) && (f.endsWith('.mp4') || f.endsWith('.mp3') || f.endsWith('.m4a') || f.endsWith('.webm') || f.endsWith('.mkv')));
+            if (match) {
+              const mPath = path.join(tempDir, match);
+              if (fs.existsSync(mPath) && fs.statSync(mPath).size > 1024) {
+                rPath = mPath;
+                job.outputFile = mPath;
+              }
+            }
+          } catch (_) {}
+        }
+
+        if (fs.existsSync(rPath) && fs.statSync(rPath).size > 1024) {
+          job.status = 'completed';
+          job.percentage = 100;
+          job.complete = true;
+          job.message = 'Download ready!';
+          console.log(`[Job ${job.id}] Fallback alternate stream succeeded: ${rPath}`);
+        } else {
+          job.status = 'failed';
+          job.error = classifyMediaError(retryStderr || stderrBuffer, retryCode);
+          job.message = `Processing failed: ${job.error}`;
+          console.error(`[Job ${job.id}] Fallback failed with code ${retryCode}: ${job.error}`);
+        }
+        processQueue();
+      });
+
+      retryChild.on('error', err => {
+        job.childProcess = null;
+        job.status = 'failed';
+        job.error = err.message;
+        job.message = `Engine process error: ${err.message}`;
+        processQueue();
+      });
+      return;
     } else {
       job.status = 'failed';
       job.error = classifyMediaError(stderrBuffer, code);
       job.message = `Processing failed: ${job.error}`;
       console.error(`[Job ${job.id}] Failed with code ${code}: ${job.error}`);
+      processQueue();
     }
 
     processQueue();
