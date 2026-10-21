@@ -73,7 +73,21 @@ function getBinaryCandidates() {
 }
 
 /**
+ * Download using system curl if available (fast & reliable on Linux)
+ */
+function downloadWithCurl(url, destPath) {
+  try {
+    const res = spawnSync('curl', ['-sSL', '-f', '-o', destPath, url], { timeout: 45000 });
+    if (res.status === 0 && fs.existsSync(destPath) && fs.statSync(destPath).size > 1024 * 1024) {
+      return true;
+    }
+  } catch (_) {}
+  return false;
+}
+
+/**
  * Download a file with redirect follow (up to 5 levels) and validation
+ */ (up to 5 levels) and validation
  */
 function downloadFile(url, destPath, redirects = 5) {
   return new Promise((resolve, reject) => {
@@ -217,7 +231,10 @@ async function setupEngine() {
     if (needDownload) {
       console.log(`🌐 [yt-dlp] Downloading official release from GitHub...`);
       try {
-        await downloadFile(candidate.url, targetPath);
+        const curlOk = downloadWithCurl(candidate.url, targetPath);
+        if (!curlOk) {
+          await downloadFile(candidate.url, targetPath);
+        }
         const stat = fs.statSync(targetPath);
         if (stat.size < candidate.minSize) {
           throw new Error(`Downloaded binary is corrupt or truncated (${stat.size} bytes < ${candidate.minSize} required)`);
